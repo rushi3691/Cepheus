@@ -1,0 +1,8 @@
+node_modules
+data.csv
+data2.csv
+src2.zip 
+.env
+database/query.ipynb
+database/queries.back.js
+.vscode
