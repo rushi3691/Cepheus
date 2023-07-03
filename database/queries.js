@@ -416,20 +416,30 @@ const getRegEventsByID = async (req, res) => {
     return res.json({ regevents: rest, user: user[0] })
 }
 
+// const getRegEvents = async (req, res) => {
+//     // req.id = req.body.id
+//     const result = await sql`
+//     SELECT event_id FROM EventTeam
+//     WHERE
+//         user_id = ${req.id} 
+//     `
+//     const rest = [];
+//     result.forEach((val) => {
+//         rest.push(val.event_id)
+//     })
+//     // console.log(rest)
+//     return res.json({ regevents: rest })
+// }
+
+/* optimize getRegEvents */
 const getRegEvents = async (req, res) => {
-    // req.id = req.body.id
-    const result = await sql`
+  const result = await sql`
     SELECT event_id FROM EventTeam
-    WHERE
-        user_id = ${req.id} 
-    `
-    const rest = [];
-    result.forEach((val) => {
-        rest.push(val.event_id)
-    })
-    // console.log(rest)
-    return res.json({ regevents: rest })
-}
+    WHERE user_id = ${req.id}
+  `;
+  const rest = result.map((val) => val.event_id);
+  return res.json({ regevents: rest });
+};
 
 // const getMates = async (req, res) => {
 //     const { event_id } = req.body;
