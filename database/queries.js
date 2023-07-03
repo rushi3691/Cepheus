@@ -454,7 +454,7 @@ const getRegEvents = async (req, res) => {
 //     }
 // }
 
-/* optimized the function getMates */
+/* optimize the function getMates */
 const getMates = async (req, res) => {
     const { event_id } = req.body;
     if (!event_id) {
@@ -513,6 +513,33 @@ const getTeamInfo = async (req, res) => {
 //         return res.status(500).json(e)
 //     }
 // }
+
+/* optimized the function getEventTeamInfo */
+const getEventTeamInfo = async (req, res) => {
+    const { event_id } = req.body;
+    if (!event_id) {
+        return res.status(500).json({
+            "message": "pass event_id"
+        })
+    }
+    const user_id = req.id;
+    try {
+        const result = await sql`
+        SELECT r.user_name, r.email, t.team_name, t.team_code
+        FROM Registered_Users r
+        JOIN eventteam et ON r.id = et.user_id
+        JOIN Team t ON t.id = et.team_id
+        WHERE et.event_id = ${event_id} AND et.user_id = ${user_id}
+        `
+        return res.json(result[0]);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            "message": "Internal server error"
+        })
+    }
+}
+
 
 
 module.exports = {
