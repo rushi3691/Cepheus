@@ -392,7 +392,7 @@ const removeEventUser = async (req, res) => {
 
 const getRegEventsByID = async (req, res) => {
     const { id } = req.body;
-    if(!id){
+    if (!id) {
         return res.status(500).json({
             "message": "provide user id"
         })
@@ -431,6 +431,30 @@ const getRegEvents = async (req, res) => {
     return res.json({ regevents: rest })
 }
 
+// const getMates = async (req, res) => {
+//     const { event_id } = req.body;
+//     if (!event_id) {
+//         return res.status(500).json({
+//             "message": "pass event_id"
+//         })
+//     }
+//     const user_id = req.id;
+//     try {
+//         const result = await sql`
+//         SELECT user_name, email FROM Registered_Users as r WHERE r.id IN (
+//             SELECT user_id FROM eventteam WHERE team_id in (
+//                 SELECT team_id FROM eventteam where user_id=${user_id} AND event_id=${event_id}
+//             )
+//         )
+//         `
+//         // console.log(result)
+//         return res.json({ data: result })
+//     } catch (e) {
+//         return res.status(500).json(e)
+//     }
+// }
+
+/* optimized the function getMates */
 const getMates = async (req, res) => {
     const { event_id } = req.body;
     if (!event_id) {
@@ -441,18 +465,17 @@ const getMates = async (req, res) => {
     const user_id = req.id;
     try {
         const result = await sql`
-        SELECT user_name, email FROM Registered_Users as r WHERE r.id IN (
-            SELECT user_id FROM eventteam WHERE team_id in (
-                SELECT team_id FROM eventteam where user_id=${user_id} AND event_id=${event_id}
-            )
-        )
-        `
-        // console.log(result)
-        return res.json({ data: result })
+        SELECT r.user_name, r.email
+        FROM Registered_Users AS r
+        JOIN EventTeam AS et1 ON et1.user_id = r.id AND et1.event_id = ${event_id}
+        JOIN EventTeam AS et2 ON et2.team_id = et1.team_id
+        WHERE et2.user_id = ${user_id}
+      `;
+        return res.json({ data: result });
     } catch (e) {
-        return res.status(500).json(e)
+        return res.status(500).json(e);
     }
-}
+};
 
 const getTeamInfo = async (req, res) => {
     const { event_id } = req.body;
@@ -463,33 +486,33 @@ const getTeamInfo = async (req, res) => {
     return res.json(result[0]);
 }
 
-const getEventTeamInfo = async (req, res) => {
-    const { event_id } = req.body;
-    if (!event_id) {
-        return res.status(500).json({
-            "message": "pass event_id"
-        })
-    }
-    const user_id = req.id;
-    // console.log(event_id, user_id)
-    try {
-        const result = await sql`
-        SELECT user_name, email FROM Registered_Users as r WHERE r.id IN (
-            SELECT user_id FROM eventteam WHERE team_id in (
-                SELECT team_id FROM eventteam where user_id=${user_id} AND event_id=${event_id}
-            )
-        )
-        `
-        const result2 = await sql`
-        SELECT team_name, team_code FROM Team
-        WHERE id IN (SELECT team_id AS id FROM eventteam WHERE user_id = ${req.id} AND event_id = ${event_id})
-        `
-        return res.json({ ...result2[0], data: result })
-    } catch (e) {
-        console.log(e)
-        return res.status(500).json(e)
-    }
-}
+// const getEventTeamInfo = async (req, res) => {
+//     const { event_id } = req.body;
+//     if (!event_id) {
+//         return res.status(500).json({
+//             "message": "pass event_id"
+//         })
+//     }
+//     const user_id = req.id;
+//     // console.log(event_id, user_id)
+//     try {
+//         const result = await sql`
+//         SELECT user_name, email FROM Registered_Users as r WHERE r.id IN (
+//             SELECT user_id FROM eventteam WHERE team_id in (
+//                 SELECT team_id FROM eventteam where user_id=${user_id} AND event_id=${event_id}
+//             )
+//         )
+//         `
+//         const result2 = await sql`
+//         SELECT team_name, team_code FROM Team
+//         WHERE id IN (SELECT team_id AS id FROM eventteam WHERE user_id = ${req.id} AND event_id = ${event_id})
+//         `
+//         return res.json({ ...result2[0], data: result })
+//     } catch (e) {
+//         console.log(e)
+//         return res.status(500).json(e)
+//     }
+// }
 
 
 module.exports = {
