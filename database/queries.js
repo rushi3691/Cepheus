@@ -507,14 +507,27 @@ const getMates = async (req, res) => {
     }
 };
 
+// const getTeamInfo = async (req, res) => {
+//     const { event_id } = req.body;
+//     const result = await sql`
+//     SELECT team_name, team_code FROM Team
+//     WHERE id IN (SELECT team_id AS id FROM eventteam WHERE user_id = ${req.id} AND event_id = ${event_id})
+//     `
+//     return res.json(result[0]);
+// }
+
+/* optimize getTeamInfo */
 const getTeamInfo = async (req, res) => {
-    const { event_id } = req.body;
-    const result = await sql`
-    SELECT team_name, team_code FROM Team
-    WHERE id IN (SELECT team_id AS id FROM eventteam WHERE user_id = ${req.id} AND event_id = ${event_id})
-    `
-    return res.json(result[0]);
-}
+  const { event_id } = req.body;
+  const { id } = req;
+  const { recordset: [result] } = await sql`
+    SELECT TOP 1 team_name, team_code
+    FROM Team
+    JOIN eventteam ON Team.id = eventteam.team_id
+    WHERE eventteam.user_id = ${id} AND eventteam.event_id = ${event_id}
+  `;
+  return res.json(result);
+};
 
 // const getEventTeamInfo = async (req, res) => {
 //     const { event_id } = req.body;
