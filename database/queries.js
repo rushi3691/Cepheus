@@ -390,6 +390,33 @@ const removeEventUser = async (req, res) => {
     }
 }
 
+// const getRegEventsByID = async (req, res) => {
+//     const { id } = req.body;
+//     if (!id) {
+//         return res.status(500).json({
+//             "message": "provide user id"
+//         })
+//     }
+//     const result = await sql`
+//     SELECT event_id FROM EventTeam e
+//     WHERE
+//         user_id = ${id} 
+//     `
+//     const rest = [];
+//     result.forEach((val) => {
+//         rest.push(val.event_id)
+//     })
+//     const user = await sql`
+//     SELECT user_name, email, mobile, college FROM Registered_Users
+//     WHERE 
+//         id=${id}
+//     `
+
+//     // console.log(rest)
+//     return res.json({ regevents: rest, user: user[0] })
+// }
+
+/* optimize getRegEventsByID */
 const getRegEventsByID = async (req, res) => {
     const { id } = req.body;
     if (!id) {
@@ -398,22 +425,15 @@ const getRegEventsByID = async (req, res) => {
         })
     }
     const result = await sql`
-    SELECT event_id FROM EventTeam e
-    WHERE
-        user_id = ${id} 
+    SELECT e.event_id, r.user_name, r.email, r.mobile, r.college
+    FROM EventTeam e
+    JOIN Registered_Users r ON e.user_id = r.id
+    WHERE e.user_id = ${id}
     `
-    const rest = [];
-    result.forEach((val) => {
-        rest.push(val.event_id)
-    })
-    const user = await sql`
-    SELECT user_name, email, mobile, college FROM Registered_Users
-    WHERE 
-        id=${id}
-    `
+    const rest = result.map(val => val.event_id);
+    const user = result[0];
 
-    // console.log(rest)
-    return res.json({ regevents: rest, user: user[0] })
+    return res.json({ regevents: rest, user })
 }
 
 // const getRegEvents = async (req, res) => {
